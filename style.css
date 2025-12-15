@@ -676,6 +676,17 @@ body {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 16px;
+    position: sticky;
+    top: 80px;
+    z-index: 50;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: -40px;
+    margin-right: -40px;
+    padding-left: 40px;
+    padding-right: 40px;
 }
 
 .results-title {
@@ -694,6 +705,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 32px;
+    padding-top: 32px;
 }
 
 .video-frames-group {
@@ -745,12 +757,47 @@ body {
     transform: translateY(-2px);
 }
 
+.frame-image-container {
+    position: relative;
+    width: 100%;
+}
+
 .frame-image {
     width: 100%;
     aspect-ratio: 16/9;
     object-fit: cover;
     display: block;
     background: rgba(255, 255, 255, 0.02);
+}
+
+.magnify-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.frame-card:hover .magnify-btn {
+    opacity: 1;
+}
+
+.magnify-btn:hover {
+    background: rgba(255, 215, 0, 0.9);
+    border-color: #FFD700;
+    transform: scale(1.1);
 }
 
 .frame-info {
@@ -1108,6 +1155,10 @@ body {
     .results-header {
         flex-direction: column;
         align-items: flex-start;
+        margin-left: -20px;
+        margin-right: -20px;
+        padding-left: 20px;
+        padding-right: 20px;
     }
 
     .results-actions {
@@ -1121,4 +1172,98 @@ body {
     .video-frames {
         grid-template-columns: 1fr;
     }
+}
+
+/* Image Magnifier */
+.image-magnifier {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.2s ease;
+}
+
+.image-magnifier.show {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.magnifier-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.magnifier-content img {
+    max-width: 100%;
+    max-height: calc(90vh - 100px);
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.magnifier-close {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10001;
+}
+
+.magnifier-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #FFD700;
+    color: #FFD700;
+    transform: rotate(90deg);
+}
+
+.magnifier-info {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    backdrop-filter: blur(10px);
 }

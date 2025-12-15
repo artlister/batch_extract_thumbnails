@@ -206,7 +206,7 @@
 
                 <!-- Results Section -->
                 <div id="results-section" class="results-section hidden">
-                    <div class="results-header">
+                    <div class="results-header sticky-header">
                         <h2 class="results-title">Extracted Frames</h2>
                         <div class="results-actions">
                             <button class="btn btn-secondary" onclick="selectAllFrames()">
@@ -232,6 +232,15 @@
         </div>
     </div>
 
+    <!-- Image Magnifier Modal -->
+    <div class="image-magnifier" id="image-magnifier" onclick="closeImageMagnifier()">
+        <button class="magnifier-close" onclick="closeImageMagnifier()">×</button>
+        <div class="magnifier-content" onclick="event.stopPropagation()">
+            <img src="" alt="Magnified frame" id="magnifier-image">
+            <div class="magnifier-info" id="magnifier-info"></div>
+        </div>
+    </div>
+
     <!-- All Generations Modal -->
     <div class="all-generations-modal" id="allGenerationsModal">
         <div class="modal-overlay" onclick="closeAllGenerations()"></div>
@@ -252,9 +261,9 @@
     </div>
 
     <!-- Lightbox Modal for Recent Generations -->
-    <div class="lightbox-modal" id="lightboxModal">
+    <div class="lightbox-modal" id="lightboxModal" onclick="if(event.target === this) closeLightbox()">
         <div class="lightbox-content">
-            <button class="lightbox-close" id="lightboxClose">×</button>
+            <button class="lightbox-close" id="lightboxClose" onclick="closeLightbox()">×</button>
             <img src="" alt="Generation" id="lightboxImage">
             <video src="" controls id="lightboxVideo" style="display: none;"></video>
             <div class="lightbox-info">

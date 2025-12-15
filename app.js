@@ -579,10 +579,16 @@ function displayExtractedFrames() {
         titleDiv.innerHTML = `
             <span>🎥</span>
             <span>${video.name}</span>
-            <button class="btn btn-secondary" onclick="selectAllVideoFrames(${videoIndex}); event.stopPropagation();" style="margin-left: auto; padding: 8px 16px; font-size: 13px;">
-                <span>✓</span>
-                <span>Select All</span>
-            </button>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="selectAllVideoFrames(${videoIndex}); event.stopPropagation();" style="padding: 8px 16px; font-size: 13px;">
+                    <span>✓</span>
+                    <span>Select All</span>
+                </button>
+                <button class="btn btn-secondary" onclick="deselectAllVideoFrames(${videoIndex}); event.stopPropagation();" style="padding: 8px 16px; font-size: 13px;">
+                    <span>✗</span>
+                    <span>Deselect All</span>
+                </button>
+            </div>
         `;
         videoGroup.appendChild(titleDiv);
         
@@ -601,13 +607,22 @@ function displayExtractedFrames() {
                 // Don't toggle if clicking the checkbox itself
                 if (e.target.type === 'checkbox') return;
                 
+                // If clicking the image or magnify button, open magnified view
+                if (e.target.classList.contains('frame-image') || e.target.classList.contains('magnify-btn')) {
+                    openImageMagnifier(frame.url, video.name, frame.label);
+                    return;
+                }
+                
                 const checkbox = this.querySelector('.frame-checkbox');
                 checkbox.checked = !checkbox.checked;
                 toggleFrameSelection(frameId, frame.url, video.name, frame.label);
             };
             
             frameCard.innerHTML = `
-                <img src="${frame.url}" alt="${frame.label}" class="frame-image" loading="lazy">
+                <div class="frame-image-container">
+                    <img src="${frame.url}" alt="${frame.label}" class="frame-image" loading="lazy" title="Click to magnify">
+                    <button class="magnify-btn" title="View full size">🔍</button>
+                </div>
                 <div class="frame-info">
                     <span class="frame-label">${frame.label}${frame.timestamp ? ` (${frame.timestamp})` : ''}</span>
                     <input type="checkbox" class="frame-checkbox" data-frame-id="${frameId}" 
@@ -664,6 +679,135 @@ function selectAllVideoFrames(videoIndex) {
     });
     
     updateSelectedCount();
+}
+
+// Deselect all frames for a specific video
+function deselectAllVideoFrames(videoIndex) {
+    const video = extractedVideos[videoIndex];
+    
+    video.frames.forEach((frame, frameIndex) => {
+        const frameId = `${videoIndex}-${frameIndex}`;
+        const checkbox = document.querySelector(`input[data-frame-id="${frameId}"]`);
+        const frameCard = document.querySelector(`.frame-card[data-frame-id="${frameId}"]`);
+        
+        if (checkbox.checked) {
+            checkbox.checked = false;
+            frameCard.classList.remove('selected');
+            selectedFrames.delete(JSON.stringify({ 
+                frameId, 
+                frameUrl: frame.url, 
+                videoName: video.name, 
+                frameLabel: frame.label 
+            }));
+        }
+    });
+    
+    updateSelectedCount();
+}
+
+// Open image magnifier/lightbox
+function openImageMagnifier(imageUrl, videoName, frameLabel) {
+    const lightbox = document.getElementById('lightboxModal');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxVideo = document.getElementById('lightboxVideo');
+    const lightboxPrompt = document.getElementById('lightboxPrompt');
+    const lightboxMeta = document.getElementById('lightboxMeta');
+    
+    // Hide video, show image
+    lightboxVideo.style.display = 'none';
+    lightboxImage.style.display = 'block';
+    lightboxImage.src = imageUrl;
+    
+    // Set metadata
+    lightboxPrompt.textContent = '';
+    lightboxMeta.textContent = `${videoName} - ${frameLabel}`;
+    
+    // Show lightbox
+    lightbox.classList.add('show');
+    
+    // Setup download button
+    document.getElementById('lightboxDownload').onclick = () => {
+        downloadSingleFrameFromUrl(imageUrl, videoName, frameLabel);
+    };
+}
+
+// Close lightbox
+function closeLightbox() {
+    document.getElementById('lightboxModal').classList.remove('show');
+}
+
+// Download single frame from URL
+async function downloadSingleFrameFromUrl(url, videoName, frameLabel) {
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${sanitizeFilename(videoName)}_${frameLabel}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        console.error('Error downloading frame:', error);
+        alert('Error downloading frame');
+    }
+}
+
+// Deselect all frames for a specific video
+function deselectAllVideoFrames(videoIndex) {
+    const video = extractedVideos[videoIndex];
+    
+    video.frames.forEach((frame, frameIndex) => {
+        const frameId = `${videoIndex}-${frameIndex}`;
+        const checkbox = document.querySelector(`input[data-frame-id="${frameId}"]`);
+        const frameCard = document.querySelector(`.frame-card[data-frame-id="${frameId}"]`);
+        
+        if (checkbox.checked) {
+            checkbox.checked = false;
+            frameCard.classList.remove('selected');
+            
+            // Remove from selectedFrames
+            for (let item of selectedFrames) {
+                const parsed = JSON.parse(item);
+                if (parsed.frameId === frameId) {
+                    selectedFrames.delete(item);
+                    break;
+                }
+            }
+        }
+    });
+    
+    updateSelectedCount();
+}
+
+// Open image magnifier
+function openImageMagnifier(imageUrl, videoName, frameLabel) {
+    const magnifier = document.getElementById('image-magnifier');
+    const magnifierImg = document.getElementById('magnifier-image');
+    const magnifierInfo = document.getElementById('magnifier-info');
+    
+    magnifierImg.src = imageUrl;
+    magnifierInfo.innerHTML = `
+        <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">${videoName}</div>
+        <div style="font-size: 14px; color: rgba(255, 215, 0, 0.9);">${frameLabel} Frame</div>
+    `;
+    
+    magnifier.classList.add('show');
+    
+    // Prevent body scroll when magnifier is open
+    document.body.style.overflow = 'hidden';
+}
+
+// Close image magnifier
+function closeImageMagnifier() {
+    const magnifier = document.getElementById('image-magnifier');
+    magnifier.classList.remove('show');
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
 }
 
 // Select all frames
