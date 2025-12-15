@@ -163,3 +163,4 @@ MIT License - Feel free to use and modify
 For issues with:
 - **FAL Workflow**: Contact FAL.ai support
 - **Application**: Create an issue in the repository
+# batch_extract_thumbnails
