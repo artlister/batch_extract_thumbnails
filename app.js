@@ -239,7 +239,7 @@ async function extractFramesFromUrls(videoUrls) {
                     
                     // Poll for completion
                     let attempts = 0;
-                    const maxAttempts = 60;
+                    const maxAttempts = 120;
                     
                     while (attempts < maxAttempts) {
                         await new Promise(resolve => setTimeout(resolve, 5000));
@@ -371,7 +371,7 @@ async function extractFramesWithFal(videoUrl) {
         
         // Poll for results
         let attempts = 0;
-        const maxAttempts = 60; // 5 minutes max (60 * 5 seconds)
+        const maxAttempts = 120; // 5 minutes max (60 * 5 seconds)
         
         while (attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
